@@ -1,0 +1,38 @@
+<annotation>
+	<folder>microcontroller object detection smaller</folder>
+	<filename>IMG_20181228_104344.jpg</filename>
+	<path>C:\Users\Gilbert\Desktop\Local_Programming\Datasets\Own\microcontroller object detection smaller\IMG_20181228_104344.jpg</path>
+	<source>
+		<database>Unknown</database>
+	</source>
+	<size>
+		<width>800</width>
+		<height>600</height>
+		<depth>3</depth>
+	</size>
+	<segmented>0</segmented>
+	<object>
+		<name>Heltec_ESP32_Lora</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>333</xmin>
+			<ymin>268</ymin>
+			<xmax>552</xmax>
+			<ymax>392</ymax>
+		</bndbox>
+	</object>
+	<object>
+		<name>ESP8266</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>274</xmin>
+			<ymin>405</ymin>
+			<xmax>548</xmax>
+			<ymax>558</ymax>
+		</bndbox>
+	</object>
+</annotation>

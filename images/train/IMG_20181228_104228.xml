@@ -1,0 +1,38 @@
+<annotation>
+	<folder>microcontroller object detection smaller</folder>
+	<filename>IMG_20181228_104228.jpg</filename>
+	<path>C:\Users\Gilbert\Desktop\Local_Programming\Datasets\Own\microcontroller object detection smaller\IMG_20181228_104228.jpg</path>
+	<source>
+		<database>Unknown</database>
+	</source>
+	<size>
+		<width>800</width>
+		<height>600</height>
+		<depth>3</depth>
+	</size>
+	<segmented>0</segmented>
+	<object>
+		<name>Arduino_Nano</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>358</xmin>
+			<ymin>176</ymin>
+			<xmax>659</xmax>
+			<ymax>304</ymax>
+		</bndbox>
+	</object>
+	<object>
+		<name>Heltec_ESP32_Lora</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>343</xmin>
+			<ymin>349</ymin>
+			<xmax>687</xmax>
+			<ymax>474</ymax>
+		</bndbox>
+	</object>
+</annotation>

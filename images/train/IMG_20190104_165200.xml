@@ -1,0 +1,26 @@
+<annotation>
+	<folder>microcontroller object detection smaller</folder>
+	<filename>IMG_20190104_165200.jpg</filename>
+	<path>C:\Users\Gilbert\Desktop\Local_Programming\Datasets\Own\microcontroller object detection smaller\IMG_20190104_165200.jpg</path>
+	<source>
+		<database>Unknown</database>
+	</source>
+	<size>
+		<width>800</width>
+		<height>600</height>
+		<depth>3</depth>
+	</size>
+	<segmented>0</segmented>
+	<object>
+		<name>Raspberry_Pi_3</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>288</xmin>
+			<ymin>220</ymin>
+			<xmax>696</xmax>
+			<ymax>559</ymax>
+		</bndbox>
+	</object>
+</annotation>

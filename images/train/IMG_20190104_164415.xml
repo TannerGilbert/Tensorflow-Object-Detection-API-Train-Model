@@ -1,0 +1,26 @@
+<annotation>
+	<folder>microcontroller object detection smaller</folder>
+	<filename>IMG_20190104_164415.jpg</filename>
+	<path>C:\Users\Gilbert\Desktop\Local_Programming\Datasets\Own\microcontroller object detection smaller\IMG_20190104_164415.jpg</path>
+	<source>
+		<database>Unknown</database>
+	</source>
+	<size>
+		<width>800</width>
+		<height>600</height>
+		<depth>3</depth>
+	</size>
+	<segmented>0</segmented>
+	<object>
+		<name>Arduino_Nano</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>294</xmin>
+			<ymin>179</ymin>
+			<xmax>587</xmax>
+			<ymax>359</ymax>
+		</bndbox>
+	</object>
+</annotation>
