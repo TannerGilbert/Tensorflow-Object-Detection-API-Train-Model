@@ -301,12 +301,108 @@ python export_inference_graph.py --input_type image_tensor --pipeline_config_pat
 
 XXXX represents the highest number.
 
-### 8. Using the model for inference
+### 8. Exporting Tensorflow Lite model
+
+If you want to run the model on a edge device like a Raspberry Pi or if you want to run it on a smartphone it's a good idea to convert your model to Tensorflow Lite format. This can be done with with the ```export_tflite_ssd_graph.py``` file.
+
+```bash
+mkdir inference_graph
+
+python export_inference_graph.py --pipeline_config_path training/faster_rcnn_inception_v2_pets.config --trained_checkpoint_prefix training/model.ckpt-XXXX --output_directory inference_graph --add_postprocessing_op=true
+```
+
+After executing the command, there should be two new files in the inference_graph folder. A tflite_graph.pb and a tflite_graph.pbtxt file.
+
+Now you have a graph architecture and network operations that are compatible with Tensorflow Lite. To finish the convertion you now need to convert the actual model.
+
+### 9. Using TOCO to Create Optimzed TensorFlow Lite Model
+
+To convert the frozen graph to Tensorflow Lite we need to run it through the Tensorflow Lite Optimizing Converter (TOCO). TOCO converts the model into an optimized FlatBuffer format that runs efficiently on Tensorflow Lite.
+
+For this to work you need to have Tensorflow installed from scratch. This is a tedious task which I wouldn't cover in this tutorial. But you can follow the [official installation guide](https://www.tensorflow.org/install/source_windows). I'd recommend you to create a [Anaconda Environment](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html) specificly for this purpose.
+
+After building Tensorflow from scratch you're ready to start the with the conversation.
+
+#### 9.1 Create Tensorflow Lite model
+
+To create a optimized Tensorflow Lite model we need to run TOCO. TOCO is locate in the tensorflow/lite directory, which you should have after install Tensorflow from source.
+
+If you want to convert a quantized model you can run the following command:
+
+```bash
+export OUTPUT_DIR=/tmp/tflite
+bazel run --config=opt tensorflow/lite/toco:toco -- \
+--input_file=$OUTPUT_DIR/tflite_graph.pb \
+--output_file=$OUTPUT_DIR/detect.tflite \
+--input_shapes=1,300,300,3 \
+--input_arrays=normalized_input_image_tensor \
+--output_arrays='TFLite_Detection_PostProcess','TFLite_Detection_PostProcess:1','TFLite_Detection_PostProcess:2','TFLite_Detection_PostProcess:3' \
+--inference_type=QUANTIZED_UINT8 \
+--mean_values=128 \
+--std_values=128 \
+--change_concat_input_ranges=false \
+--allow_custom_ops
+```
+
+If you are using a floating point model like a faster rcnn you'll need to change to command a bit:
+
+bazel run --config=opt tensorflow/lite/toco:toco -- --input_file=$OUTPUT_DIR/tflite_graph.pb --output_file=$OUTPUT_DIR/detect.tflite --input_shapes=1,300,300,3 --input_arrays=normalized_input_image_tensor --output_arrays=TFLite_Detection_PostProcess,TFLite_Detection_PostProcess:1,TFLite_Detection_PostProcess:2,TFLite_Detection_PostProcess:3 --inference_type=FLOAT --allow_custom_ops 
+
+```bash
+export OUTPUT_DIR=/tmp/tflite
+bazel run --config=opt tensorflow/lite/toco:toco -- \
+--input_file=$OUTPUT_DIR/tflite_graph.pb \
+--output_file=$OUTPUT_DIR/detect.tflite \
+--input_shapes=1,300,300,3 \
+--input_arrays=normalized_input_image_tensor \
+--output_arrays='TFLite_Detection_PostProcess','TFLite_Detection_PostProcess:1','TFLite_Detection_PostProcess:2','TFLite_Detection_PostProcess:3' \
+--inference_type=FLOAT  \
+--allow_custom_ops
+```
+
+If you are working on Windows you might need to remove the ' if the command doesn't work. For more information on how to use TOCO check out [the official instructions](https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/running_on_mobile_tensorflowlite.md).
+
+#### 9.2 Create new labelmap for Tensorflow Lite
+
+Next you need to create a label map for Tensorflow Lite, since it doesn't have the same format as a classical Tensorflow labelmap.
+
+Tensorflow labelmap:
+
+```bash
+item {
+    name: "a"
+    id: 1
+    display_name: "a"
+}
+item {
+    name: "b"
+    id: 2
+    display_name: "b"
+}
+item {
+    name: "c"
+    id: 3
+    display_name: "c"
+}
+```
+
+The Tensorflow Lite labelmap format only has the display_names (if there is no display_name the name is used).
+
+```bash
+a
+b
+c
+``` 
+
+So basically the only thing you need to do is to create a new labelmap file and copy the display_names (names) from the other labelmap file into it.
+
+### 10. Using the model for inference
 
 After training the model it can be used in many ways. For examples on how to use the model check out my other repositories.
 
 * [Inference with Tensorflow 1.x](https://github.com/TannerGilbert/Tutorials/tree/master/Tensorflow%20Object%20Detection)
 * [Tensorflow-Object-Detection-with-Tensorflow-2.0](https://github.com/TannerGilbert/Tensorflow-Object-Detection-with-Tensorflow-2.0)
+* [Run TFLite model with EdgeTPU](https://github.com/TannerGilbert/Google-Coral-Edge-TPU/blob/master/tflite_object_detection.py)
 
 ## Appendix
 
