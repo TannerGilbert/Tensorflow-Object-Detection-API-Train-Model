@@ -104,6 +104,14 @@ If your installation works correctly you should see the following output:
 
 ![Tensorflow Object Detection API Tutorial Output](doc/tutorial_output.png)
 
+### Run the Tensorflow Object Detection API with Docker
+
+Installing the Tensorflow Object Detection API can be hard because there are lots of errors that can occur depending on your operating system. Docker makes it easy to setup the Tensorflow Object Detection API because you only need to download the files inside the [docker folder](docker/) and run **docker-compose up**. 
+
+After running the command docker should automatically download and install everything needed for the Tensorflow Object Detection API and open Jupyter on port 8888. If you also want to have access to the bash for training models you can simply say **docker exec -it CONTAINER_ID**. For more information check out [Dockers documentation](https://docs.docker.com/).
+
+If you experience any problems with the docker files be sure to let me know.
+
 ### 2. Gathering data
 
 Now that the Tensorflow Object Detection API is ready to go, we need to gather the images needed for training. 
@@ -345,8 +353,6 @@ bazel run --config=opt tensorflow/lite/toco:toco -- \
 ```
 
 If you are using a floating point model like a faster rcnn you'll need to change to command a bit:
-
-bazel run --config=opt tensorflow/lite/toco:toco -- --input_file=$OUTPUT_DIR/tflite_graph.pb --output_file=$OUTPUT_DIR/detect.tflite --input_shapes=1,300,300,3 --input_arrays=normalized_input_image_tensor --output_arrays=TFLite_Detection_PostProcess,TFLite_Detection_PostProcess:1,TFLite_Detection_PostProcess:2,TFLite_Detection_PostProcess:3 --inference_type=FLOAT --allow_custom_ops 
 
 ```bash
 export OUTPUT_DIR=/tmp/tflite
