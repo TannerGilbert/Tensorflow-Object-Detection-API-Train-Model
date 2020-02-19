@@ -7,7 +7,7 @@ RUN apt-get update && \
 RUN apt-get install -y git
 
 # Installing the Tensorflow Object Detection API (https://gilberttanner.com/blog/installing-the-tensorflow-object-detection-api)
-RUN git clone --depth 1 https://github.com/tensorflow/models.git
+RUN git clone --depth 1 -b r1.13.0 https://github.com/tensorflow/models.git
 
 # Install object detection api dependencies
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -y protobuf-compiler python3-pil python3-lxml python3-tk && \
@@ -15,6 +15,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get install -y protobuf-compiler python3-
     pip install contextlib2 && \
     pip install jupyter && \
     pip install matplotlib && \
+    pip install Pillow && \
     pip install tensorflow==1.14.0
 
 # Install pycocoapi
