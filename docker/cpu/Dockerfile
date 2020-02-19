@@ -1,23 +1,21 @@
-FROM ubuntu:16.04
+FROM python:3.7
 
-RUN apt-get update && apt-get upgrade -y
+# install build utilities
+RUN apt-get update && \
+	apt-get install -y gcc make apt-transport-https ca-certificates build-essential
 
 RUN apt-get install -y git
-
-RUN apt-get install -y python3 && apt-get install -y python3-pip
-
-RUN update-alternatives --install /usr/bin/python python /usr/bin/python3.6 1
 
 # Installing the Tensorflow Object Detection API (https://gilberttanner.com/blog/installing-the-tensorflow-object-detection-api)
 RUN git clone --depth 1 https://github.com/tensorflow/models.git
 
 # Install object detection api dependencies
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -y protobuf-compiler python3-pil python3-lxml python3-tk && \
-    pip3 install Cython && \
-    pip3 install contextlib2 && \
-    pip3 install jupyter && \
-    pip3 install matplotlib && \
-    pip3 install tensorflow==1.14.0
+    pip install Cython && \
+    pip install contextlib2 && \
+    pip install jupyter && \
+    pip install matplotlib && \
+    pip install tensorflow==1.14.0
 
 # Install pycocoapi
 RUN git clone --depth 1 https://github.com/cocodataset/cocoapi.git && \
