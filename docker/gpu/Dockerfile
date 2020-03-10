@@ -1,4 +1,4 @@
-FROM nvidia/cuda:10.1-cudnn7-devel
+FROM nvidia/cuda:10.0-cudnn7-devel
 
 RUN apt-get update && apt-get upgrade -y
 
@@ -18,7 +18,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get install -y protobuf-compiler python3-
     pip3 install jupyter && \
     pip3 install matplotlib && \
     pip3 install Pillow && \
-    pip3 install tensorflow==1.14.0
+    pip3 install tensorflow-gpu==1.14.0
 
 # Install pycocoapi
 RUN git clone --depth 1 https://github.com/cocodataset/cocoapi.git && \
