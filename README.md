@@ -1,6 +1,8 @@
 # How to train a custom object detection model with the Tensorflow Object Detection API
 (ReadME inspired by [EdjeElectronics](https://github.com/EdjeElectronics))
 
+> Update: This README and Repository is now fully updated for Tensorflow 2. If you want to use Tensorflow 1 instead check out [my article](https://gilberttanner.com/blog/creating-your-own-objectdetector). If you want to train your model in Google Colab check out [my notebook](Tensorflow_2_Object_Detection_Train_model.ipynb).
+
 ![Example Output](doc/output.png)
 
 ## Introduction
@@ -9,53 +11,34 @@
 
 ### 1. Installation
 
-#### Clone the repository and install dependencies
+You can install the TensorFlow Object Detection API either with Python Package Installer (pip) or [Docker](https://www.docker.com/), an open-source platform for deploying and managing containerized applications. For running the Tensorflow Object Detection API locally, Docker is recommended. If you aren't familiar with Docker though, it might be easier to install it using pip.
 
-First we need to clone the Tensorflow models repository. This can be done by either cloning the repository directly or by typing **git clone https://github.com/tensorflow/models** inside a command line.
-
-After cloning the repository it is a good idea to install all the dependencies. This can be done by typing:
+First clone the master branch of the Tensorflow Models repository:
 
 ```bash
-pip install --user Cython
-pip install --user contextlib2
-pip install --user pillow
-pip install --user lxml
-pip install --user jupyter
-pip install --user matplotlib
+git clone https://github.com/tensorflow/models.git
 ```
 
-#### Install the COCO API
+#### Docker Installation
 
-COCO is a large image dataset designed for object detection, segmentation, person keypoints detection, stuff segmentation, and caption generation. If you want to use the data-set and evaluation metrics you need to clone the cocoapi repository and copy the pycocotools subfolder to the tensorflow/models/research directory.
-
-```bash
-git clone https://github.com/cocodataset/cocoapi.git
-cd cocoapi/PythonAPI
-make
-cp -r pycocotools <path_to_tensorflow>/models/research/
+```
+# From the root of the git repository (inside the models directory)
+docker build -f research/object_detection/dockerfiles/tf2/Dockerfile -t od .
+docker run -it od
 ```
 
-Using make won't work on windows. To install the cocoapi on windows the following command can be used:
+#### Python Package Installation
 
-```bash
-pip install "git+https://github.com/philferriere/cocoapi.git#egg=pycocotools&subdirectory=PythonAPI"
+```
+cd models/research
+# Compile protos.
+protoc object_detection/protos/*.proto --python_out=.
+# Install TensorFlow Object Detection API.
+cp object_detection/packages/tf2/setup.py .
+python -m pip install .
 ```
 
-#### Protobuf Installation/Compilation
-
-The Tensorflow Object Detection API uses .proto files. These files need to be compiled into .py files in order for the Object Detection API to work properly. Google provides a programmed called Protobuf that can compile these files.
-
-Protobuf can be downloaded from this website. After downloading you can extract the folder in a directory of your choice.
-
-After extracting the folder you need to go into models/research and use protobuf to extract python files from the proto files in the object_detection/protos directory.
-
-The official installation guide uses protobuf like:
-
-```bash
-./bin/protoc object_detection/protos/*.proto --python_out=. 
-```
-
-But the * which stands for all files didn’t work for me so I wrote a little Python script to execute the command for each .proto file.
+> Note: The *.proto designating all files does not work protobuf version 3.5 and higher. If you are using version 3.5, you have to go through each file individually. To make this easier, I created a python script that loops through a directory and converts all proto files one at a time.
 
 ```python
 import os
@@ -68,49 +51,43 @@ for file in os.listdir(directory):
         os.system(protoc_path+" "+directory+"/"+file+" --python_out=.")
 ```
 
-This file needs to be saved inside the research folder and I named it use_protobuf.py. Now we can use it by going into the console and typing:
-
-```bash
-python use_protobuf.py <path to directory> <path to protoc file>  Example: python use_protobuf.py object_detection/protos C:/Users/Gilbert/Downloads/bin/protoc 
+```
+python use_protobuf.py <path to directory> <path to protoc file>
 ```
 
-#### Add necessary environment variables and finish Tensorflow Object Detection API installation
+To test the installation run:
 
-Lastly we need to add the research and research slim folder to our environment variables and run the setup.py file.
-
-To add the paths to environment variables in Linux you need to type:
-
-```bash
-export PYTHONPATH=$PYTHONPATH:<PATH_TO_TF>/TensorFlow/models/research
-export PYTHONPATH=$PYTHONPATH:<PATH_TO_TF>/TensorFlow/models/research/object_detection
-export PYTHONPATH=$PYTHONPATH:<PATH_TO_TF>/TensorFlow/models/research/slim
+```
+# Test the installation.
+python object_detection/builders/model_builder_tf2_test.py
 ```
 
-On windows you need to at the path of the research folder and the research/slim to your PYTHONPATH environment variable (See Environment Setup) .
+If everything installed correctly you should see something like:
 
-To run the setup.py file we need to navigate to tensorflow/models/research and run:
-
-```bash
-# From within TensorFlow/models/research/
-python setup.py build
-python setup.py install
 ```
+...
+[       OK ] ModelBuilderTF2Test.test_create_ssd_models_from_config
+[ RUN      ] ModelBuilderTF2Test.test_invalid_faster_rcnn_batchnorm_update
+[       OK ] ModelBuilderTF2Test.test_invalid_faster_rcnn_batchnorm_update
+[ RUN      ] ModelBuilderTF2Test.test_invalid_first_stage_nms_iou_threshold
+[       OK ] ModelBuilderTF2Test.test_invalid_first_stage_nms_iou_threshold
+[ RUN      ] ModelBuilderTF2Test.test_invalid_model_config_proto
+[       OK ] ModelBuilderTF2Test.test_invalid_model_config_proto
+[ RUN      ] ModelBuilderTF2Test.test_invalid_second_stage_batch_size
+[       OK ] ModelBuilderTF2Test.test_invalid_second_stage_batch_size
+[ RUN      ] ModelBuilderTF2Test.test_session
+[  SKIPPED ] ModelBuilderTF2Test.test_session
+[ RUN      ] ModelBuilderTF2Test.test_unknown_faster_rcnn_feature_extractor
+[       OK ] ModelBuilderTF2Test.test_unknown_faster_rcnn_feature_extractor
+[ RUN      ] ModelBuilderTF2Test.test_unknown_meta_architecture
+[       OK ] ModelBuilderTF2Test.test_unknown_meta_architecture
+[ RUN      ] ModelBuilderTF2Test.test_unknown_ssd_feature_extractor
+[       OK ] ModelBuilderTF2Test.test_unknown_ssd_feature_extractor
+----------------------------------------------------------------------
+Ran 20 tests in 91.767s
 
-This completes the installation of the object detection api. To test if everything is working correctly, run the object_detection_tutorial.ipynb notebook from the object_detection folder.
-
-> Causion: The new object_detection_tutorial.ipynb only works with Tensorflow 2.0. If you want to use Tensorflow 1.x get the file from my Github instead.
-
-If your installation works correctly you should see the following output:
-
-![Tensorflow Object Detection API Tutorial Output](doc/tutorial_output.png)
-
-### Run the Tensorflow Object Detection API with Docker
-
-Installing the Tensorflow Object Detection API can be hard because there are lots of errors that can occur depending on your operating system. Docker makes it easy to setup the Tensorflow Object Detection API because you only need to download the files inside the [docker folder](docker/) and run **docker-compose up**. 
-
-After running the command docker should automatically download and install everything needed for the Tensorflow Object Detection API and open Jupyter on port 8888. If you also want to have access to the bash for training models you can simply say **docker exec -it CONTAINER_ID**. For more information check out [Dockers documentation](https://docs.docker.com/).
-
-If you experience any problems with the docker files be sure to let me know.
+OK (skipped=1)
+```
 
 ### 2. Gathering data
 
@@ -152,7 +129,7 @@ LabelImg supports two formats, PascalVOC and Yolo. For this tutorial make sure t
 
 With the images labeled, we need to create TFRecords that can be served as input data for training of the object detector. In order to create the TFRecords we will use two scripts from [Dat Tran’s raccoon detector](https://github.com/datitran/raccoon_dataset). Namely the xml_to_csv.py and generate_tfrecord.py files.
 
-After downloading both scripts we can first of change the main method in the   xml_to_csv file so we can transform the created xml files to csv correctly.
+After downloading both scripts we can first of change the main method in the xml_to_csv file so we can transform the created xml files to csv correctly.
 
 ```python
 # Old:
@@ -249,38 +226,40 @@ The id number of each item should match the id of specified in the generate_tfre
 
 #### 5.2 Creating the training configuration
 
-Lastly we need to create a training configuration file. As a base model I will use faster_rcnn_inception, which just like a lot of other models can be downloaded from the [Tensorflow detection model zoo](https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/detection_model_zoo.md).
+Lastly we need to create a training configuration file. As a base model I will use EfficientDet – a recent family of SOTA models discovered with the help of Neural Architecture Search. The Tensorflow OD API provides a lot of different models. For more information check out the [Tensorflow 2 Detection Model Zoo](https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/tf2_detection_zoo.md)
 
-Because we are using a faster_rcnn_inception model we can choose one of its predefined configurations. We will use faster_rcnn_inception_v2_pets.config located inside the models/research/object_detection/samples/configs folder.
+The [base config](https://github.com/tensorflow/models/blob/master/research/object_detection/configs/tf2/ssd_efficientdet_d0_512x512_coco17_tpu-8.config) for the model can be found inside the [configs/tf2 folder](https://github.com/tensorflow/models/tree/master/research/object_detection/configs/tf2).
 
-Copy the config file to the training directory- Then open it inside a text editor and make the following changes:
+Copy the config file to the training directory. Then open it inside a text editor and make the following changes:
 
-* Line 9: change the number of classes to number of objects you want to detect (4 in my case)
+* Line 13: change the number of classes to number of objects you want to detect (4 in my case)
 
-* Line 106: change fine_tune_checkpoint to the path of the model.ckpt file:
+* Line 141: change fine_tune_checkpoint to the path of the model.ckpt file:
 
-    * ```fine_tune_checkpoint: "C:/Users/Gilbert/Downloads/Other/models/research/object_detection/faster_rcnn_inception_v2_coco_2018_01_28/model.ckpt"```
+    * ```fine_tune_checkpoint: "<path>/efficientdet_d0_coco17_tpu-32/checkpoint/ckpt-0"```
 
-* Line 123: change input_path to the path of the train.records file:
+* Line 143: Change ```fine_tune_checkpoint_type``` to detection
 
-    * ```input_path: "C:/Users/Gilbert/Downloads/Other/models/research/object_detection/train.record"```
+* Line 182: change input_path to the path of the train.records file:
 
-* Line 135: change input_path to the path of the test.records file:
+    * ```input_path: "<path>/train.record"```
 
-    * ```input_path: "C:/Users/Gilbert/Downloads/Other/models/research/object_detection/test.record"```
+* Line 197: change input_path to the path of the test.records file:
 
-* Line 125 and 137: change label_map_path to the path of the label map:
+    * ```input_path: "<path>/test.record"```
 
-    * ```label_map_path: "C:/Users/Gilbert/Downloads/Other/models/research/object_detection/training/labelmap.pbtxt"```
+* Line 180 and 193: change label_map_path to the path of the label map:
 
-* Line 130: change num_example to the number of images in your test folder.
+    * ```label_map_path: "<path>/labelmap.pbtxt"```
+
+* Line 144 and 189: change batch_size to a number appropriate for your hardware, like 4, 8 or 16.
 
 ### 6. Training the model
 
 To train the model execute the following command in the command line:
 
 ```bash
-python model_main.py --logtostderr --model_dir=training/ --pipeline_config_path=training/faster_rcnn_inception_v2_pets.config
+python model_main_tf2.py --pipeline_config_path=training/ssd_efficientdet_d0_512x512_coco17_tpu-8.config --model_dir=training --alsologtostderr
 ```
 
 If everything was setup correctly the training should begin shortly and you should see something like the following:
@@ -289,7 +268,7 @@ If everything was setup correctly the training should begin shortly and you shou
 
 Every few minutes the current loss gets logged to Tensorboard. Open Tensorboard by opening a second command line, navigating to the object_detection folder and typing:
 
-```tensorboard --logdir=training```
+```tensorboard --logdir=training/train```
 
 This will open a webpage at localhost:6006.
 
@@ -299,131 +278,24 @@ The training scrips saves checkpoints about every five minutes. Train the model 
 
 ### 7. Exporting the inference graph
 
-Now that we have a trained model we need to generate an inference graph, which can be used to run the model. For doing so we need to first of find out the highest saved step number. For this, we need to navigate to the training directory and look for the model.ckpt file with the biggest index.
+Now that we have a trained model we need to generate an inference graph, which can be used to run the model.
 
-Then we can create the inference graph by typing the following command in the command line.
+> Note: There is currently a [issue](https://github.com/tensorflow/models/issues/8841) that occurs when you're trying to export the model. As a temprary fix Github user [Jacobsolawetz](https://github.com/Jacobsolawetz) discoverd that you can add ```if not isinstance(x, str):``` add line 140 of the ```https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/keras/utils/tf_utils.py``` script. For more information check out [his comment to the issue](https://github.com/tensorflow/models/issues/8841#issuecomment-657647648).
 
 ```bash
-python export_inference_graph.py --input_type image_tensor --pipeline_config_path training/faster_rcnn_inception_v2_pets.config --trained_checkpoint_prefix training/model.ckpt-XXXX --output_directory inference_graph
+python /content/models/research/object_detection/exporter_main_v2.py \
+    --trained_checkpoint_dir training \
+    --output_directory inference_graph \
+    --pipeline_config_path training/ssd_efficientdet_d0_512x512_coco17_tpu-8.config
 ```
-
-XXXX represents the highest number.
-
-### 8. Exporting Tensorflow Lite model
-
-If you want to run the model on a edge device like a Raspberry Pi or if you want to run it on a smartphone it's a good idea to convert your model to Tensorflow Lite format. This can be done with with the ```export_tflite_ssd_graph.py``` file.
-
-```bash
-mkdir inference_graph
-
-python export_inference_graph.py --pipeline_config_path training/faster_rcnn_inception_v2_pets.config --trained_checkpoint_prefix training/model.ckpt-XXXX --output_directory inference_graph --add_postprocessing_op=true
-```
-
-After executing the command, there should be two new files in the inference_graph folder. A tflite_graph.pb and a tflite_graph.pbtxt file.
-
-Now you have a graph architecture and network operations that are compatible with Tensorflow Lite. To finish the convertion you now need to convert the actual model.
-
-### 9. Using TOCO to Create Optimzed TensorFlow Lite Model
-
-To convert the frozen graph to Tensorflow Lite we need to run it through the Tensorflow Lite Optimizing Converter (TOCO). TOCO converts the model into an optimized FlatBuffer format that runs efficiently on Tensorflow Lite.
-
-For this to work you need to have Tensorflow installed from scratch. This is a tedious task which I wouldn't cover in this tutorial. But you can follow the [official installation guide](https://www.tensorflow.org/install/source_windows). I'd recommend you to create a [Anaconda Environment](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html) specificly for this purpose.
-
-After building Tensorflow from scratch you're ready to start the with the conversation.
-
-#### 9.1 Create Tensorflow Lite model
-
-To create a optimized Tensorflow Lite model we need to run TOCO. TOCO is locate in the tensorflow/lite directory, which you should have after install Tensorflow from source.
-
-If you want to convert a quantized model you can run the following command:
-
-```bash
-export OUTPUT_DIR=/tmp/tflite
-bazel run --config=opt tensorflow/lite/toco:toco -- \
---input_file=$OUTPUT_DIR/tflite_graph.pb \
---output_file=$OUTPUT_DIR/detect.tflite \
---input_shapes=1,300,300,3 \
---input_arrays=normalized_input_image_tensor \
---output_arrays='TFLite_Detection_PostProcess','TFLite_Detection_PostProcess:1','TFLite_Detection_PostProcess:2','TFLite_Detection_PostProcess:3' \
---inference_type=QUANTIZED_UINT8 \
---mean_values=128 \
---std_values=128 \
---change_concat_input_ranges=false \
---allow_custom_ops
-```
-
-If you are using a floating point model like a faster rcnn you'll need to change to command a bit:
-
-```bash
-export OUTPUT_DIR=/tmp/tflite
-bazel run --config=opt tensorflow/lite/toco:toco -- \
---input_file=$OUTPUT_DIR/tflite_graph.pb \
---output_file=$OUTPUT_DIR/detect.tflite \
---input_shapes=1,300,300,3 \
---input_arrays=normalized_input_image_tensor \
---output_arrays='TFLite_Detection_PostProcess','TFLite_Detection_PostProcess:1','TFLite_Detection_PostProcess:2','TFLite_Detection_PostProcess:3' \
---inference_type=FLOAT  \
---allow_custom_ops
-```
-
-If you are working on Windows you might need to remove the ' if the command doesn't work. For more information on how to use TOCO check out [the official instructions](https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/running_on_mobile_tensorflowlite.md).
-
-#### 9.2 Create new labelmap for Tensorflow Lite
-
-Next you need to create a label map for Tensorflow Lite, since it doesn't have the same format as a classical Tensorflow labelmap.
-
-Tensorflow labelmap:
-
-```bash
-item {
-    name: "a"
-    id: 1
-    display_name: "a"
-}
-item {
-    name: "b"
-    id: 2
-    display_name: "b"
-}
-item {
-    name: "c"
-    id: 3
-    display_name: "c"
-}
-```
-
-The Tensorflow Lite labelmap format only has the display_names (if there is no display_name the name is used).
-
-```bash
-a
-b
-c
-``` 
-
-So basically the only thing you need to do is to create a new labelmap file and copy the display_names (names) from the other labelmap file into it.
 
 ### 10. Using the model for inference
 
 After training the model it can be used in many ways. For examples on how to use the model check out my other repositories.
 
-* [Inference with Tensorflow 1.x](https://github.com/TannerGilbert/Tutorials/tree/master/Tensorflow%20Object%20Detection)
 * [Tensorflow-Object-Detection-with-Tensorflow-2.0](https://github.com/TannerGilbert/Tensorflow-Object-Detection-with-Tensorflow-2.0)
-* [Run TFLite model with EdgeTPU](https://github.com/TannerGilbert/Google-Coral-Edge-TPU/blob/master/tflite_object_detection.py)
 
 ## Appendix
-
-### Common Errors
-
-The Tensorflow Object Detection API has lots of painful error that can be quite hard to solve. In this appendix section you can find the errors I encountered and how to solve them.
-
-#### 1. ModuleNotFoundError: No module named 'object_detection', ImportError : cannot import name 'string_int_label_map_pb2, No module named nets
-
-These errors occur when the object detection API wasn't installed correctly. Make sure to follow [my installation guide](https://gilberttanner.com/blog/installing-the-tensorflow-object-detection-api) correctly.
-
-
-#### 2. AttributeError: module 'tensorflow' has no attribute 'app', AttributeError: module 'tensorflow' has no attribute 'contrib'
-
-Training models with Tensorflow 2.0 insn't supported yet. I will update the repository as soon as it is supported.
 
 ### Common Questions
 
