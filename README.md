@@ -1,7 +1,7 @@
 # How to train a custom object detection model with the Tensorflow Object Detection API
 (ReadME inspired by [EdjeElectronics](https://github.com/EdjeElectronics))
 
-> Update: This README and Repository is now fully updated for Tensorflow 2. If you want to use Tensorflow 1 instead check out [my article](https://gilberttanner.com/blog/creating-your-own-objectdetector). If you want to train your model in Google Colab check out [my notebook](Tensorflow_2_Object_Detection_Train_model.ipynb).
+> Update: This README and Repository is now fully updated for Tensorflow 2. If you want to use Tensorflow 1 instead check out [my article](https://gilberttanner.com/blog/creating-your-own-objectdetector). If you want to train your model in Google Colab check out [the Tensorflow_2_Object_Detection_Train_model notebook](Tensorflow_2_Object_Detection_Train_model.ipynb).
 
 ![Example Output](doc/output.png)
 
@@ -93,11 +93,9 @@ OK (skipped=1)
 
 Now that the Tensorflow Object Detection API is ready to go, we need to gather the images needed for training. 
 
-To train a robust model, we need lots of pictures that should vary as much as possible from each other. That means that they should have different lighting conditions, different backgrounds and lots of random objects in them.
+To train a robust model, the pictures should be as diverse as possible. So they should have different backgrounds, varying lighting conditions, and unrelated random objects in them.
 
-You can either take the pictures yourself or you can download them from the internet. For my microcontroller detector, I have four different objects I want to detect (Arduino Nano, ESP8266, Raspberry Pi 3, Heltect ESP32 Lora).
-
-I took about 25 pictures of each individual microcontroller and 25 pictures containing multiple microcontrollers using my smartphone. After taking the pictures make sure to transform them to a resolution suitable for training (I used 800x600).
+You can either take pictures yourself, or you can download pictures from the internet. For my microcontroller detector, I took about 25 pictures of each individual microcontroller and 25 pictures containing multiple microcontrollers.
 
 ![](doc/image_gallery.png)
 
@@ -107,13 +105,13 @@ You can use the [resize_images script](resize_images.py) to resize the image to 
 python resize_images.py -d images/ -s 800 600
 ```
 
-After you have all the images move about 80% to the object_detection/images/train directory and the other 20% to the object_detection/images/test directory. Make sure that the images in both directories have a good variety of classes.
+After you have all the images, move about 80% to the object_detection/images/train directory and the other 20% to the object_detection/images/test directory. Make sure that the images in both directories have a good variety of classes.
 
 ### 3. Labeling data
 
 With all the pictures gathered, we come to the next step - labeling the data. Labeling is the process of drawing bounding boxes around the desired objects.
 
-LabelImg is a great tool for creating a object detection data-set.
+LabelImg is a great tool for creating an object detection data-set.
 
 [LabelImg GitHub](https://github.com/tzutalin/labelImg)
 
@@ -123,13 +121,13 @@ Download and install LabelImg. Then point it to your images/train and images/tes
 
 ![label images](doc/label_image.png)
 
-LabelImg supports two formats, PascalVOC and Yolo. For this tutorial make sure to select PascalVOC. LabelImg saves a xml file containing the label data for each image. These files will be used to create a tfrecord file, which can be used to train the model.
+LabelImg supports two formats, PascalVOC and Yolo. For this tutorial, make sure to select PascalVOC. LabelImg saves a xml file containing the label data for each image. These files will be used to create a tfrecord file, which can be used to train the model.
 
 ### 4. Generating Training data
 
-With the images labeled, we need to create TFRecords that can be served as input data for training of the object detector. In order to create the TFRecords we will use two scripts from [Dat Tran’s raccoon detector](https://github.com/datitran/raccoon_dataset). Namely the xml_to_csv.py and generate_tfrecord.py files.
+With the images labeled, we need to create TFRecords that can be served as input data for training the object detector. To create the TFRecords, we will use two scripts from [Dat Tran’s raccoon detector](https://github.com/datitran/raccoon_dataset). Namely, the xml_to_csv.py and generate_tfrecord.py files.
 
-After downloading both scripts we can first of change the main method in the xml_to_csv file so we can transform the created xml files to csv correctly.
+After downloading both scripts, we first change the main method in the xml_to_csv file to transform the created xml files to csv correctly.
 
 ```python
 # Old:
@@ -153,7 +151,7 @@ Now we can transform our xml files to csvs by opening the command line and typin
 python xml_to_csv.py
 ```
 
-These creates two files in the images directory. One called test_labels.csv and another one called train_labels.csv.
+The above command creates two files in the images directory. One called test_labels.csv and another one called train_labels.csv.
 
 Next, open the generate_tfrecord.py file and replace the labelmap inside the class_text_to_int method with your own label map.
 
@@ -193,7 +191,7 @@ python generate_tfrecord.py --csv_input=images/train_labels.csv --image_dir=imag
 python generate_tfrecord.py --csv_input=images/test_labels.csv --image_dir=images/test --output_path=test.record
 ```
 
-These two commands generate a train.record and a test.record file which can be used to train our object detector.
+These two commands generate a train.record and a test.record file, which can be used to train our object detector.
 
 ### 5. Getting ready for training
 
@@ -226,7 +224,7 @@ The id number of each item should match the id of specified in the generate_tfre
 
 #### 5.2 Creating the training configuration
 
-Lastly we need to create a training configuration file. As a base model I will use EfficientDet – a recent family of SOTA models discovered with the help of Neural Architecture Search. The Tensorflow OD API provides a lot of different models. For more information check out the [Tensorflow 2 Detection Model Zoo](https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/tf2_detection_zoo.md)
+Lastly, we need to create a training configuration file. As a base model, I will use EfficientDet – a recent family of SOTA models discovered with the help of Neural Architecture Search. The Tensorflow OD API provides a lot of different models. For more information check out the [Tensorflow 2 Detection Model Zoo](https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/tf2_detection_zoo.md)
 
 The [base config](https://github.com/tensorflow/models/blob/master/research/object_detection/configs/tf2/ssd_efficientdet_d0_512x512_coco17_tpu-8.config) for the model can be found inside the [configs/tf2 folder](https://github.com/tensorflow/models/tree/master/research/object_detection/configs/tf2).
 
@@ -252,21 +250,21 @@ Copy the config file to the training directory. Then open it inside a text edito
 
     * ```label_map_path: "<path>/labelmap.pbtxt"```
 
-* Line 144 and 189: change batch_size to a number appropriate for your hardware, like 4, 8 or 16.
+* Line 144 and 189: change batch_size to a number appropriate for your hardware, like 4, 8, or 16.
 
 ### 6. Training the model
 
-To train the model execute the following command in the command line:
+To train the model, execute the following command in the command line:
 
 ```bash
 python model_main_tf2.py --pipeline_config_path=training/ssd_efficientdet_d0_512x512_coco17_tpu-8.config --model_dir=training --alsologtostderr
 ```
 
-If everything was setup correctly the training should begin shortly and you should see something like the following:
+If everything was setup correctly, the training should begin shortly, and you should see something like the following:
 
 ![training the model](doc/training_model.png)
 
-Every few minutes the current loss gets logged to Tensorboard. Open Tensorboard by opening a second command line, navigating to the object_detection folder and typing:
+Every few minutes, the current loss gets logged to Tensorboard. Open Tensorboard by opening a second command line, navigating to the object_detection folder and typing:
 
 ```tensorboard --logdir=training/train```
 
@@ -274,13 +272,13 @@ This will open a webpage at localhost:6006.
 
 ![monitor training](doc/monitor_training.png)
 
-The training scrips saves checkpoints about every five minutes. Train the model until it reaches a satisfying loss then you can terminat the training process by pressing Ctrl+C.
+The training script saves checkpoints about every five minutes. Train the model until it reaches a satisfying loss, then you can terminate the training process by pressing Ctrl+C.
 
 ### 7. Exporting the inference graph
 
-Now that we have a trained model we need to generate an inference graph, which can be used to run the model.
+Now that we have a trained model, we need to generate an inference graph that can be used to run the model.
 
-> Note: There is currently a [issue](https://github.com/tensorflow/models/issues/8841) that occurs when you're trying to export the model. As a temprary fix Github user [Jacobsolawetz](https://github.com/Jacobsolawetz) discoverd that you can add ```if not isinstance(x, str):``` add line 140 of the ```https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/keras/utils/tf_utils.py``` script. For more information check out [his comment to the issue](https://github.com/tensorflow/models/issues/8841#issuecomment-657647648).
+> Note: There is currently an [issue](https://github.com/tensorflow/models/issues/8841) that occurs when you're trying to export the model. As a temporary fix, Github user [Jacobsolawetz](https://github.com/Jacobsolawetz) discovered that you can add ```if not isinstance(x, str):``` add line 140 of the ```https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/keras/utils/tf_utils.py``` script. For more information, check out [his comment on the issue](https://github.com/tensorflow/models/issues/8841#issuecomment-657647648).
 
 ```bash
 python /content/models/research/object_detection/exporter_main_v2.py \
