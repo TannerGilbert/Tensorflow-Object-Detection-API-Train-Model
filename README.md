@@ -9,53 +9,34 @@
 
 ### 1. Installation
 
-#### Clone the repository and install dependencies
+You can install the TensorFlow Object Detection API either with Python Package Installer (pip) or Docker, an open-source platform for deploying and managing containerized applications. For running the Tensorflow Object Detection API locally, Docker is recommended. If you aren't familiar with Docker though, it might be easier to install it using pip.
 
-First we need to clone the Tensorflow models repository. This can be done by either cloning the repository directly or by typing **git clone https://github.com/tensorflow/models** inside a command line.
-
-After cloning the repository it is a good idea to install all the dependencies. This can be done by typing:
+First clone the master branch of the Tensorflow Models repository:
 
 ```bash
-pip install --user Cython
-pip install --user contextlib2
-pip install --user pillow
-pip install --user lxml
-pip install --user jupyter
-pip install --user matplotlib
+git clone https://github.com/tensorflow/models.git
 ```
 
-#### Install the COCO API
-
-COCO is a large image dataset designed for object detection, segmentation, person keypoints detection, stuff segmentation, and caption generation. If you want to use the data-set and evaluation metrics you need to clone the cocoapi repository and copy the pycocotools subfolder to the tensorflow/models/research directory.
+#### Docker Installation
 
 ```bash
-git clone https://github.com/cocodataset/cocoapi.git
-cd cocoapi/PythonAPI
-make
-cp -r pycocotools <path_to_tensorflow>/models/research/
+# From the root of the git repository
+docker build -f research/object_detection/dockerfiles/tf1/Dockerfile -t od .
+docker run -it od
 ```
 
-Using make won't work on windows. To install the cocoapi on windows the following command can be used:
+#### Python Package Installation
 
 ```bash
-pip install "git+https://github.com/philferriere/cocoapi.git#egg=pycocotools&subdirectory=PythonAPI"
+cd models/research
+# Compile protos.
+protoc object_detection/protos/*.proto --python_out=.
+# Install TensorFlow Object Detection API.
+cp object_detection/packages/tf1/setup.py .
+python -m pip install .
 ```
 
-#### Protobuf Installation/Compilation
-
-The Tensorflow Object Detection API uses .proto files. These files need to be compiled into .py files in order for the Object Detection API to work properly. Google provides a programmed called Protobuf that can compile these files.
-
-Protobuf can be downloaded from this website. After downloading you can extract the folder in a directory of your choice.
-
-After extracting the folder you need to go into models/research and use protobuf to extract python files from the proto files in the object_detection/protos directory.
-
-The official installation guide uses protobuf like:
-
-```bash
-./bin/protoc object_detection/protos/*.proto --python_out=. 
-```
-
-But the * which stands for all files didn’t work for me so I wrote a little Python script to execute the command for each .proto file.
+> Note: The *.proto designating all files does not work protobuf version 3.5 and higher. If you are using version 3.5, you have to go through each file individually. To make this easier, I created a python script that loops through a directory and converts all proto files one at a time.
 
 ```python
 import os
@@ -68,49 +49,68 @@ for file in os.listdir(directory):
         os.system(protoc_path+" "+directory+"/"+file+" --python_out=.")
 ```
 
-This file needs to be saved inside the research folder and I named it use_protobuf.py. Now we can use it by going into the console and typing:
-
-```bash
-python use_protobuf.py <path to directory> <path to protoc file>  Example: python use_protobuf.py object_detection/protos C:/Users/Gilbert/Downloads/bin/protoc 
+```
+python use_protobuf.py <path to directory> <path to protoc file>
 ```
 
-#### Add necessary environment variables and finish Tensorflow Object Detection API installation
-
-Lastly we need to add the research and research slim folder to our environment variables and run the setup.py file.
-
-To add the paths to environment variables in Linux you need to type:
+To test the installation run:
 
 ```bash
-export PYTHONPATH=$PYTHONPATH:<PATH_TO_TF>/TensorFlow/models/research
-export PYTHONPATH=$PYTHONPATH:<PATH_TO_TF>/TensorFlow/models/research/object_detection
-export PYTHONPATH=$PYTHONPATH:<PATH_TO_TF>/TensorFlow/models/research/slim
+# Test the installation.
+python object_detection/builders/model_builder_tf1_test.py
 ```
 
-On windows you need to at the path of the research folder and the research/slim to your PYTHONPATH environment variable (See Environment Setup) .
-
-To run the setup.py file we need to navigate to tensorflow/models/research and run:
+If everything installed correctly you should see something like:
 
 ```bash
-# From within TensorFlow/models/research/
-python setup.py build
-python setup.py install
+Running tests under Python 3.6.9: /usr/bin/python3
+[ RUN      ] ModelBuilderTF1Test.test_create_context_rcnn_from_config_with_params(True)
+[       OK ] ModelBuilderTF1Test.test_create_context_rcnn_from_config_with_params(True)
+[ RUN      ] ModelBuilderTF1Test.test_create_context_rcnn_from_config_with_params(False)
+[       OK ] ModelBuilderTF1Test.test_create_context_rcnn_from_config_with_params(False)
+[ RUN      ] ModelBuilderTF1Test.test_create_experimental_model
+[       OK ] ModelBuilderTF1Test.test_create_experimental_model
+[ RUN      ] ModelBuilderTF1Test.test_create_faster_rcnn_from_config_with_crop_feature(True)
+[       OK ] ModelBuilderTF1Test.test_create_faster_rcnn_from_config_with_crop_feature(True)
+[ RUN      ] ModelBuilderTF1Test.test_create_faster_rcnn_from_config_with_crop_feature(False)
+[       OK ] ModelBuilderTF1Test.test_create_faster_rcnn_from_config_with_crop_feature(False)
+[ RUN      ] ModelBuilderTF1Test.test_create_faster_rcnn_model_from_config_with_example_miner
+[       OK ] ModelBuilderTF1Test.test_create_faster_rcnn_model_from_config_with_example_miner
+[ RUN      ] ModelBuilderTF1Test.test_create_faster_rcnn_models_from_config_faster_rcnn_with_matmul
+[       OK ] ModelBuilderTF1Test.test_create_faster_rcnn_models_from_config_faster_rcnn_with_matmul
+[ RUN      ] ModelBuilderTF1Test.test_create_faster_rcnn_models_from_config_faster_rcnn_without_matmul
+[       OK ] ModelBuilderTF1Test.test_create_faster_rcnn_models_from_config_faster_rcnn_without_matmul
+[ RUN      ] ModelBuilderTF1Test.test_create_faster_rcnn_models_from_config_mask_rcnn_with_matmul
+[       OK ] ModelBuilderTF1Test.test_create_faster_rcnn_models_from_config_mask_rcnn_with_matmul
+[ RUN      ] ModelBuilderTF1Test.test_create_faster_rcnn_models_from_config_mask_rcnn_without_matmul
+[       OK ] ModelBuilderTF1Test.test_create_faster_rcnn_models_from_config_mask_rcnn_without_matmul
+[ RUN      ] ModelBuilderTF1Test.test_create_rfcn_model_from_config
+[       OK ] ModelBuilderTF1Test.test_create_rfcn_model_from_config
+[ RUN      ] ModelBuilderTF1Test.test_create_ssd_fpn_model_from_config
+[       OK ] ModelBuilderTF1Test.test_create_ssd_fpn_model_from_config
+[ RUN      ] ModelBuilderTF1Test.test_create_ssd_models_from_config
+[       OK ] ModelBuilderTF1Test.test_create_ssd_models_from_config
+[ RUN      ] ModelBuilderTF1Test.test_invalid_faster_rcnn_batchnorm_update
+[       OK ] ModelBuilderTF1Test.test_invalid_faster_rcnn_batchnorm_update
+[ RUN      ] ModelBuilderTF1Test.test_invalid_first_stage_nms_iou_threshold
+[       OK ] ModelBuilderTF1Test.test_invalid_first_stage_nms_iou_threshold
+[ RUN      ] ModelBuilderTF1Test.test_invalid_model_config_proto
+[       OK ] ModelBuilderTF1Test.test_invalid_model_config_proto
+[ RUN      ] ModelBuilderTF1Test.test_invalid_second_stage_batch_size
+[       OK ] ModelBuilderTF1Test.test_invalid_second_stage_batch_size
+[ RUN      ] ModelBuilderTF1Test.test_session
+[  SKIPPED ] ModelBuilderTF1Test.test_session
+[ RUN      ] ModelBuilderTF1Test.test_unknown_faster_rcnn_feature_extractor
+[       OK ] ModelBuilderTF1Test.test_unknown_faster_rcnn_feature_extractor
+[ RUN      ] ModelBuilderTF1Test.test_unknown_meta_architecture
+[       OK ] ModelBuilderTF1Test.test_unknown_meta_architecture
+[ RUN      ] ModelBuilderTF1Test.test_unknown_ssd_feature_extractor
+[       OK ] ModelBuilderTF1Test.test_unknown_ssd_feature_extractor
+----------------------------------------------------------------------
+Ran 21 tests in 0.163s
+
+OK (skipped=1)
 ```
-
-This completes the installation of the object detection api. To test if everything is working correctly, run the object_detection_tutorial.ipynb notebook from the object_detection folder.
-
-> Causion: The new object_detection_tutorial.ipynb only works with Tensorflow 2.0. If you want to use Tensorflow 1.x get the file from my Github instead.
-
-If your installation works correctly you should see the following output:
-
-![Tensorflow Object Detection API Tutorial Output](doc/tutorial_output.png)
-
-### Run the Tensorflow Object Detection API with Docker
-
-Installing the Tensorflow Object Detection API can be hard because there are lots of errors that can occur depending on your operating system. Docker makes it easy to setup the Tensorflow Object Detection API because you only need to download the files inside the [docker folder](docker/) and run **docker-compose up**. 
-
-After running the command docker should automatically download and install everything needed for the Tensorflow Object Detection API and open Jupyter on port 8888. If you also want to have access to the bash for training models you can simply say **docker exec -it CONTAINER_ID**. For more information check out [Dockers documentation](https://docs.docker.com/).
-
-If you experience any problems with the docker files be sure to let me know.
 
 ### 2. Gathering data
 
