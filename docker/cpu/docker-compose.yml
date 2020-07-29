@@ -1,9 +1,0 @@
-version: '2.3'
-
-services:
-   tensorflow_object_detection_api:
-     container_name: tensorflow_object_detection_api
-     build: ./
-     restart: always
-     ports:
-      - '8888:8888'
