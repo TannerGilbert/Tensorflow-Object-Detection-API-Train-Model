@@ -287,7 +287,7 @@ python /content/models/research/object_detection/exporter_main_v2.py \
     --pipeline_config_path training/ssd_efficientdet_d0_512x512_coco17_tpu-8.config
 ```
 
-### 10. Using the model for inference
+### 8. Using the model for inference
 
 After training the model it can be used in many ways. For examples on how to use the model check out my other repositories.
 
