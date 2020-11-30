@@ -1,3 +1,5 @@
+#based on https://github.com/datitran/raccoon_dataset/blob/master/generate_tfrecord.py
+
 from __future__ import division
 from __future__ import print_function
 from __future__ import absolute_import
