@@ -256,8 +256,6 @@ The training script saves checkpoints about every five minutes. Train the model 
 
 Now that we have a trained model, we need to generate an inference graph that can be used to run the model.
 
-> Note: There is currently an [issue](https://github.com/tensorflow/models/issues/8841) that occurs when you're trying to export the model. As a temporary fix, Github user [Jacobsolawetz](https://github.com/Jacobsolawetz) discovered that you can add ```if not isinstance(x, str):``` add line 140 of the ```https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/keras/utils/tf_utils.py``` script. For more information, check out [his comment on the issue](https://github.com/tensorflow/models/issues/8841#issuecomment-657647648).
-
 ```bash
 python /content/models/research/object_detection/exporter_main_v2.py \
     --trained_checkpoint_dir training \
